@@ -8,3 +8,6 @@
 
 # Node
 node_modules/*
+
+# Database
+db.sqlite
