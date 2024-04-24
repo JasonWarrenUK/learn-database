@@ -2,25 +2,40 @@
 const db = require("../database/db");
 
 /* --- METHODS --- */
-const insert_task = db.prepare(`
-	INSERT INTO tasks (content)
-	VALUES (?)
-	RETURNING id, content, created_at
+const tasks = db.prepare(/*sql*/`
+	SELECT *
+	FROM tasks
+`).all();
+
+const insert_task = db.prepare(/*sql*/`
+	INSERT INTO tasks (content, complete)
+  VALUES ($content, $complete)
+  RETURNING id, content, created_at
+`);
+
+const select_tasks = db.prepare(/*sql*/ `
+  SELECT id, content, created_at, complete
+	FROM tasks
 `);
 
 /* --- FUNCTIONS --- */
-function createTask(content) {
-	return insert_task.get(content);
+function createTask(task) {
+	return insert_task.get(task);
+}
+
+function listTasks() {
+  return select_tasks.all();
 }
 
 /* --- TESTS --- */
-const tasks = db.prepare("SELECT * FROM tasks").all();
 console.groupCollapsed("*** tasks.js ***");
-console.log(tasks);
-const testTask = createTask("Eat a banana");
-console.log(testTask);
-console.log(tasks);
+	console.log(listTasks());
+	console.log(`Creating Task`);
+	createTask({ content: "stuff", complete: 1 })
+	console.log(listTasks());
+	// console.log(``);
+	// console.log(listTasks());
 console.groupEnd();
 
 /* --- EXPORT, FELICIA --- */
-module.exports = { createTask };
+module.exports = { createTask, listTasks };
